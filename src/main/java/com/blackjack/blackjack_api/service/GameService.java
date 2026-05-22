@@ -1,5 +1,6 @@
 package com.blackjack.blackjack_api.service;
 
+import com.blackjack.blackjack_api.exception.GameNotFoundException;
 import com.blackjack.blackjack_api.model.Game;
 import com.blackjack.blackjack_api.model.Hand;
 import com.blackjack.blackjack_api.repository.GameReactiveRepository;
@@ -33,11 +34,13 @@ public class GameService {
     }
 
     public Mono<Game> getGameById(String gameId) {
-        return gameRepository.findById(gameId);
+        return gameRepository.findById(gameId)
+                .switchIfEmpty(Mono.error(new GameNotFoundException(gameId)));
     }
 
     public Mono<Game> playTurn(String gameId, Long playerId, String action) {
         return gameRepository.findById(gameId)
+                .switchIfEmpty(Mono.error(new GameNotFoundException(gameId)))
                 .flatMap(game -> {
                     Hand playerHand = game.getPlayerHands().get(playerId);
 
@@ -53,6 +56,7 @@ public class GameService {
 
     public Mono<Game> finishGame(String gameId) {
         return gameRepository.findById(gameId)
+                .switchIfEmpty(Mono.error(new GameNotFoundException(gameId)))
                 .flatMap(game -> {
                     Hand dealerHand = game.getDealerHand();
 
@@ -72,6 +76,8 @@ public class GameService {
     }
 
     public Mono<Void> deleteGame(String gameId) {
-        return gameRepository.deleteById(gameId);
+        return gameRepository.findById(gameId)
+                .switchIfEmpty(Mono.error(new GameNotFoundException(gameId)))
+                .flatMap(game -> gameRepository.deleteById(gameId));
     }
 }
