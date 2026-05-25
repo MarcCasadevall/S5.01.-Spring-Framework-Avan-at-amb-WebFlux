@@ -4,6 +4,10 @@ import com.blackjack.blackjack_api.dto.GameDTO;
 import com.blackjack.blackjack_api.dto.PlayRequestDTO;
 import com.blackjack.blackjack_api.model.Game;
 import com.blackjack.blackjack_api.service.GameService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,10 +20,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/game")
 @AllArgsConstructor
+@Tag(name = "Game", description = "Endpoints for managing Blackjack games")
 public class GameController {
     private final GameService gameService;
 
     @PostMapping("/new")
+    @Operation(summary = "Create a new game", description = "Creates a new Blackjack game with specified players")
+    @ApiResponse(responseCode = "201", description = "Game created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid request")
     public Mono<ResponseEntity<GameDTO>> createGame(@RequestBody CreateGameRequest request) {
         return gameService.createGame(request.getPlayerIds(), request.getDealerId())
                 .map(this::convertToDTO)
@@ -27,14 +35,20 @@ public class GameController {
     }
 
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<GameDTO>> getGame(@PathVariable String id) {
+    @Operation(summary = "Get game by ID", description = "Retrieves a specific game by its ID")
+    @ApiResponse(responseCode = "200", description = "Game found")
+    @ApiResponse(responseCode = "404", description = "Game not found")
+    public Mono<ResponseEntity<GameDTO>> getGame(@PathVariable @Parameter(description = "Game ID") String id) {
         return gameService.getGameById(id)
                 .map(this::convertToDTO)
                 .map(ResponseEntity::ok);
     }
 
     @PostMapping("/{id}/play")
-    public Mono<ResponseEntity<GameDTO>> playTurn(@PathVariable String id,
+    @Operation(summary = "Execute a play action", description = "Executes a play action (HIT or STAND) in an active game")
+    @ApiResponse(responseCode = "200", description = "Action executed successfully")
+    @ApiResponse(responseCode = "404", description = "Game not found")
+    public Mono<ResponseEntity<GameDTO>> playTurn(@PathVariable @Parameter(description = "Game ID") String id,
                                                   @RequestBody PlayRequestDTO request) {
         return gameService.playTurn(id, request.getPlayerId(), request.getAction())
                 .map(this::convertToDTO)
@@ -42,7 +56,10 @@ public class GameController {
     }
 
     @DeleteMapping("/{id}/delete")
-    public Mono<ResponseEntity<Void>> deleteGame(@PathVariable String id) {
+    @Operation(summary = "Delete a game", description = "Deletes a game by its ID")
+    @ApiResponse(responseCode = "204", description = "Game deleted successfully")
+    @ApiResponse(responseCode = "404", description = "Game not found")
+    public Mono<ResponseEntity<Void>> deleteGame(@PathVariable @Parameter(description = "Game ID") String id) {
         return gameService.deleteGame(id)
                 .map(v -> ResponseEntity.noContent().<Void>build());
     }
