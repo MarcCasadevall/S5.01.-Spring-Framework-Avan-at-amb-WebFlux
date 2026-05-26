@@ -1,0 +1,11 @@
+.git
+.gitignore
+.idea
+.vscode
+*.md
+target/
+*.jar
+node_modules
+.env
+.mvn/wrapper/maven-wrapper.jar
+mvnw.cmd
