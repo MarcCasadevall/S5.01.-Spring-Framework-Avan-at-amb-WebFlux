@@ -9,18 +9,14 @@ spring:
     show-sql: false
 
   datasource:
-    url: jdbc:mysql://mysql:3306/blackjack?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: blackjack_user
-    password: blackjack_pass
+    url: jdbc:mysql://mysql:3306/blackjack_games
     driver-class-name: com.mysql.cj.jdbc.Driver
+    username: TU_USUARIO_MYSQL
+    password: TU_CONTRASENA_MYSQL
 
   data:
     mongodb:
       uri: mongodb://admin:admin@mongodb:27017/blackjack_games?authSource=admin
-
-  web:
-    resources:
-      static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/
 
 springdoc:
   swagger-ui:
